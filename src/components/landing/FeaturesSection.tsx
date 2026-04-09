@@ -71,7 +71,7 @@ const FeaturesSection = () => {
           className="mb-14 text-center"
         >
           <span className="mb-3 inline-block rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Why IdeaLens
+            Why CrazeCheck
           </span>
           <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Everything you need to validate fast
