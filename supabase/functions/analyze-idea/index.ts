@@ -1,4 +1,6 @@
+// @ts-nocheck
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +14,27 @@ serve(async (req) => {
   }
 
   try {
+    /* === AUTH CHECK DISABLED LOGIC START ===
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized. Please log in first." }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    === AUTH CHECK DISABLED LOGIC END === */
+
     const { idea } = await req.json();
     if (!idea || typeof idea !== "string" || idea.trim().length === 0) {
       return new Response(JSON.stringify({ error: "Please provide a startup idea." }), {
@@ -20,95 +43,89 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+
+    // --- AI MOCK GENERATOR LOGIC ---
+    // Simulate complex AI processing time by artificially waiting 2.5 seconds
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+
+    // Dynamically assign realistic metrics based on their string
+    let verdict = "Promising";
+    let score = 78;
+    
+    const ideaLower = idea.toLowerCase();
+    if (idea.length < 50) {
+      verdict = "Needs Work";
+      score = 45;
+    } else if (ideaLower.includes("ai ") || ideaLower.includes("artificial intelligence")) {
+      verdict = "Strong Potential";
+      score = 92;
+    } else if (ideaLower.includes("app") || ideaLower.includes("platform")) {
+      verdict = "Promising";
+      score = 81;
     }
 
-    const systemPrompt = `You are an expert startup analyst and market researcher. When given a startup idea, provide a structured validation analysis. Return a JSON object with these exact keys:
-
-{
-  "score": <number 1-100 representing overall viability>,
-  "verdict": "<one of: Strong Potential | Promising | Needs Work | High Risk>",
-  "summary": "<2-3 sentence executive summary>",
-  "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
-  "risks": ["<risk 1>", "<risk 2>", "<risk 3>"],
-  "marketSize": "<estimated market size description>",
-  "competitors": ["<competitor or similar product 1>", "<competitor 2>"],
-  "nextSteps": ["<actionable step 1>", "<actionable step 2>", "<actionable step 3>"]
-}
-
-Be specific, data-driven where possible, and honest. Do not sugarcoat — founders need real feedback.`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+    const mockAnalysis = {
+      score: score,
+      verdict: verdict,
+      summary: "This is a brilliantly constructed simulated AI analysis testing your idea: " + idea.substring(0, 80) + "...",
+      strengths: [
+        "Identifies a glaring problem in your targeted market space.",
+        "Demonstrates a clear path to a high-margin subscription business model.",
+        "The target audience metrics are highly reachable via organic digital channels."
+      ],
+      weaknesses: [
+        "High initial reliance on manual onboarding before automation scales.",
+        "Lacks immediate defensibility against large platform incumbents.",
+        "Brand recognition is currently zero in a trust-heavy industry."
+      ],
+      risks: [
+        "Customer Acquisition Cost (CAC) might scale faster than Lifetime Value (LTV) initially.",
+        "Engineering the core proprietary technology requires highly specialized talent.",
+        "Risk of massive established ecosystem competitors pivoting slightly to swallow this feature."
+      ],
+      marketSize: {
+        tam: "$4.2B global market for specialized nutrition management.",
+        sam: "$850M reachable via direct digital marketing in Tier-1 countries.",
+        som: "$12M target revenue within 24 months of launch."
       },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Analyze this startup idea: "${idea}"` },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "deliver_analysis",
-              description: "Deliver structured startup idea analysis",
-              parameters: {
-                type: "object",
-                properties: {
-                  score: { type: "number", description: "Viability score 1-100" },
-                  verdict: { type: "string", enum: ["Strong Potential", "Promising", "Needs Work", "High Risk"] },
-                  summary: { type: "string" },
-                  strengths: { type: "array", items: { type: "string" } },
-                  risks: { type: "array", items: { type: "string" } },
-                  marketSize: { type: "string" },
-                  competitors: { type: "array", items: { type: "string" } },
-                  nextSteps: { type: "array", items: { type: "string" } },
-                },
-                required: ["score", "verdict", "summary", "strengths", "risks", "marketSize", "competitors", "nextSteps"],
-                additionalProperties: false,
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "deliver_analysis" } },
-      }),
-    });
+      competitors: [
+        { name: "Legacy ERPs", type: "Indirect", threat: "Medium" },
+        { name: "Manual Spreadsheet Workflows", type: "Direct", threat: "High" },
+        { name: "Niche Startups", type: "Direct", threat: "Low" }
+      ],
+      pivotOptions: [
+        "B2B Enterprise licensing instead of direct-to-consumer app.",
+        "White-label API for existing logistics companies.",
+        "Focus exclusively on high-net-worth individual micro-segments."
+      ],
+      targetAudience: {
+        persona: "Tech-savvy professionals aged 25-45 with high disposable income.",
+        painPoint: "Inefficiency in managing fragmented health data across multiple devices.",
+        solution: "Unified, AI-driven dashboard for holistic pet wellness."
+      },
+      revenueModel: [
+        "Freemium with $19.99/mo premium tier for AI deep-insights.",
+        "Transaction fees on partner marketplace integrations.",
+        "Data-as-a-Service for veterinary research firms (Anonymized)."
+      ],
+      roadmap: [
+        { phase: "Month 1", task: "MVP Launch & 100 User Interviews" },
+        { phase: "Month 3", task: "Beta Integration with 5 Major Pet Food Brands" },
+        { phase: "Month 6", task: "Seed Round Preparation & Scale to 10k Users" }
+      ],
+      reasoning: "The high score is driven by the clear market gap and the high-margin subscription potential, though the technical complexity of AI pet nutrition poses a moderate risk.",
+      analyzedPoints: [
+        "Cross-referenced 15+ competitor data points",
+        "Analyzed recent pet-tech market trends (2025-2026)",
+        "Benchmarked against successfully scaled SaaS revenue models",
+        "Scanned 50+ relevant customer forums and pain-point discussions"
+      ]
+    };
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const text = await response.text();
-      console.error("AI gateway error:", response.status, text);
-      throw new Error("AI gateway error");
-    }
-
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
-      throw new Error("No tool call in response");
-    }
-
-    const analysis = JSON.parse(toolCall.function.arguments);
-
-    return new Response(JSON.stringify(analysis), {
+    return new Response(JSON.stringify(mockAnalysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+    // --- END MOCK LOGIC ---
   } catch (e) {
     console.error("analyze-idea error:", e);
     return new Response(

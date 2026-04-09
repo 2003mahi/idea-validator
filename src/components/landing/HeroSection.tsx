@@ -3,6 +3,15 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const HeroSection = () => {
+  const handleTryNow = () => {
+    // Scroll smoothly to IdeaInput
+    const element = document.querySelector("textarea");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      element.focus();
+    }
+  };
+
   return (
     <section className="relative flex flex-col items-center px-6 pt-36 pb-16 text-center md:pt-44 md:pb-24">
       {/* Subtle gradient orb */}
@@ -28,6 +37,7 @@ const HeroSection = () => {
         </p>
 
         <Button
+          onClick={handleTryNow}
           size="lg"
           className="mt-2 gap-2 rounded-full px-8 text-base font-semibold shadow-medium transition-all hover:shadow-elevated"
         >
