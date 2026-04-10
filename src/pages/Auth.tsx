@@ -57,9 +57,10 @@ const Auth = () => {
         setPassword("");
       }
     } catch (error: any) {
-      let errorMessage = error.message;
+      let errorMessage = error.message || "An unexpected error occurred";
+      const safeMessage = errorMessage.toLowerCase();
       
-      if (error.status === 429 || errorMessage.toLowerCase().includes("rate limit") || errorMessage.toLowerCase().includes("too many requests")) {
+      if (error.status === 429 || safeMessage.includes("rate limit") || safeMessage.includes("too many requests")) {
         errorMessage = "Slow down! You've made too many requests. Please wait a few minutes before trying again.";
       }
       
