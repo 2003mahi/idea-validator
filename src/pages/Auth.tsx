@@ -11,7 +11,12 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
+
+  // Clear any "Auth Required" toasts when reaching the auth page
+  useEffect(() => {
+    dismiss();
+  }, [dismiss]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,12 +26,33 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ title: "Sign In Successful!", description: "Successfully logged in." });
+        toast({ title: "Welcome Back!", description: "Successfully logged in." });
         navigate("/dashboard");
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        toast({ title: "Sign up Successful!", description: "Please log in with your new details." });
+        const { error } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            emailRedirectTo: window.location.origin
+          }
+        });
+        
+        if (error) {
+          if (error.message.includes("already registered")) {
+            toast({ 
+              title: "Account Found", 
+              description: "This email is already registered. Switching to Sign In mode.",
+            });
+            setIsLogin(true);
+            return;
+          }
+          throw error;
+        }
+
+        toast({ 
+          title: "Registration Successful!", 
+          description: "Check your email for a confirmation link to activate your account.",
+        });
         setIsLogin(true);
         setPassword("");
       }
