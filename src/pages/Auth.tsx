@@ -57,7 +57,17 @@ const Auth = () => {
         setPassword("");
       }
     } catch (error: any) {
-      toast({ title: "Authentication Failed", description: error.message, variant: "destructive" });
+      let errorMessage = error.message;
+      
+      if (error.status === 429 || errorMessage.toLowerCase().includes("rate limit") || errorMessage.toLowerCase().includes("too many requests")) {
+        errorMessage = "Slow down! You've made too many requests. Please wait a few minutes before trying again.";
+      }
+      
+      toast({ 
+        title: "Authentication Issue", 
+        description: errorMessage, 
+        variant: "destructive" 
+      });
     } finally {
       setLoading(false);
     }
