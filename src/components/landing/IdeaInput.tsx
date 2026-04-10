@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Send, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import AnalysisResults, { type IdeaAnalysis } from "./AnalysisResults";
 
 const IdeaInput = () => {
@@ -11,18 +12,21 @@ const IdeaInput = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<IdeaAnalysis | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAnalyze = async () => {
     if (!idea.trim()) return;
     
     // Check if user is logged in
-    const { data: { user } } = await supabase.auth.getUser();
+    const userResponse = await supabase.auth.getUser();
+    const user = userResponse.data?.user;
+
     if (!user) {
       toast({ 
-        title: "Authentication Required", 
-        description: "Please sign in to validate your startup ideas.", 
-        variant: "destructive" 
+        title: "Sign In Required", 
+        description: "Join CrazeCheck to start validating your ideas and track your history.", 
       });
+      navigate("/auth");
       return;
     }
 
