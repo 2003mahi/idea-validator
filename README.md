@@ -79,7 +79,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  <p>Built with ❤️ by Founders for Founders</p>
+  <p>Built with ❤️ by NexusHub TEAM for Founders</p>
   <a href="https://github.com/2003mahi/idea-validator">
     <img src="https://img.shields.io/github/stars/2003mahi/idea-validator?style=social" alt="Stars" />
   </a>
