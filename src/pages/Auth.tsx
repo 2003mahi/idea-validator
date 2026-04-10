@@ -38,7 +38,7 @@ const Auth = () => {
         });
         
         if (error) {
-          if (error.message.includes("already registered")) {
+          if (error.message.toLowerCase().includes("already registered")) {
             toast({ 
               title: "Account Found", 
               description: "This email is already registered. Switching to Sign In mode.",
