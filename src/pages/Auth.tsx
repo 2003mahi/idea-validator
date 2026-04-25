@@ -14,9 +14,13 @@ const Auth = () => {
   const { toast, dismiss } = useToast();
 
   // Clear any "Auth Required" toasts when reaching the auth page
+  // Empty dependency array ensures this runs only once on mount; dismiss is
+  // intentionally omitted because it is recreated on every render and including
+  // it would cause an infinite re-render loop.
   useEffect(() => {
     dismiss();
-  }, [dismiss]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
