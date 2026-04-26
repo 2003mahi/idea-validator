@@ -4,6 +4,7 @@ import { Loader2, Sparkles, MoveRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { classifyAuthError } from "@/lib/authErrors";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -25,8 +26,17 @@ const Auth = () => {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
+      // Guard against an uninitialised Supabase client (missing env vars).
+      if (!supabase || typeof supabase.auth === "undefined") {
+        throw new Error(
+          "The app is not configured correctly. " +
+          "Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment. " +
+          "See .env.example for details."
+        );
+      }
+
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -60,13 +70,10 @@ const Auth = () => {
         setIsLogin(true);
         setPassword("");
       }
-    } catch (error: any) {
-      let errorMessage = error.message || "An unexpected error occurred";
-      const safeMessage = errorMessage.toLowerCase();
-      
-      if (error.status === 429 || safeMessage.includes("rate limit") || safeMessage.includes("too many requests")) {
-        errorMessage = "Slow down! You've made too many requests. Please wait a few minutes before trying again.";
-      }
+    } catch (error: unknown) {
+      const errorMessage = classifyAuthError(
+        error as { message?: string; status?: number }
+      );
       
       toast({ 
         title: "Authentication Issue", 
