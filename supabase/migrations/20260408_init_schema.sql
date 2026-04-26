@@ -12,13 +12,7 @@ create table if not exists public.validations (
   user_id uuid references public.profiles(id) on delete cascade not null,
   idea_text text not null,
   score integer not null,
-  verdict text not null,
-  summary text not null,
-  strengths text[] not null,
-  risks text[] not null,
-  market_size text not null,
-  competitors text[] not null,
-  next_steps text[] not null,
+  result_json jsonb not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
